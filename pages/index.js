@@ -4,22 +4,28 @@ import Link from 'next/link'
 import { useEffect,useState } from 'react'
 import styles from '../styles/Home.module.css'
 
-export default function Home() {
+export async function getStaticProps() {
+
+  const url = "https://mflixbackredecanais.herokuapp.com/data"
+  const pull = await fetch(url)
+  const pullJson = await pull.json()
+  const data = pullJson.filter(x=> x.poster_path !== null)
+  console.log(data)
+
+  return {
+    props: {
+      data,
+    },
+    revalidate: 24*60*60, // In seconds
+  }
+}
+export default function Home({data}) {
   const [useData,setData] = useState(false)
   const [baseUrl] = useState("https://redecanais.to")
   const [imgUrl] = useState('https://image.tmdb.org/t/p/w300')
   useEffect(()=>{
-    
-    (async ()=>{
-      const url = "/api/data"
-      const pull = await fetch(url)
-      const data = await pull.json()
-      const filter = data.filter(x=> x.poster_path !== null)
-      console.log(filter)
-      setData(filter)
-    })()
-
-  },[])
+    setData(data)
+  },[data])
   
   return (
     <div className={styles.container}>
